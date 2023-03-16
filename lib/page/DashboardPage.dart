@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, avoid_unnecessary_containers
+// ignore_for_file: prefer_const_literals_to_create_immutables, avoid_unnecessary_containers, curly_braces_in_flow_control_structures, unrelated_type_equality_checks
 
 import 'dart:async';
 
@@ -33,6 +33,7 @@ class _DashboardPage extends State<DashboardPage> {
 
   bool _autoAcceptPairingRequests = false;
   bool enableSwitch = false;
+  bool enablePair = false;
 
   @override
   void initState() {
@@ -81,6 +82,8 @@ class _DashboardPage extends State<DashboardPage> {
     }
   }
 
+  goToSettings() => FlutterBluetoothSerial.instance.openSettings();
+
   @override
   void dispose() {
     try {
@@ -110,12 +113,7 @@ class _DashboardPage extends State<DashboardPage> {
                   padding: const EdgeInsets.symmetric(vertical: 22.0),
                   width: width,
                   height: width / 10,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        enableSwitch = !enableSwitch;
-                      });
-                    },
+                  child: Container(
                     child: Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
@@ -141,11 +139,24 @@ class _DashboardPage extends State<DashboardPage> {
                                 inactiveColor: bg,
                                 width: width * 0.12,
                                 height: width * 0.07,
-                                value: enableSwitch,
-                                onToggle: (value) {
-                                  setState(() {
-                                    enableSwitch = value;
-                                  });
+                                value: _bluetoothState.isEnabled,
+                                onToggle: (bool value) {
+                                  try {
+                                    future() async {
+                                      if (value)
+                                        await FlutterBluetoothSerial.instance
+                                            .requestEnable();
+                                      else
+                                        await FlutterBluetoothSerial.instance
+                                            .requestDisable();
+                                    }
+
+                                    future().then((_) {
+                                      setState(() {});
+                                    });
+                                  } catch (e) {
+                                    print(e);
+                                  }
                                 },
                               ),
                             ]),
@@ -158,34 +169,248 @@ class _DashboardPage extends State<DashboardPage> {
                   flex: 3,
                   child: Container(
                       child: RippleAnimation(
-                    color: enableSwitch ? bg : base,
+                    color: _bluetoothState.isEnabled ? bg : base,
                     delay: const Duration(milliseconds: 300),
                     repeat: true,
                     minRadius: 85,
                     ripplesCount: 4,
                     duration: const Duration(seconds: 3),
-                    child: CircleAvatar(
-                      backgroundColor: enableSwitch ? bgColor : bg,
-                      minRadius: 85,
-                      maxRadius: 85,
-                      child: Icon(
-                        Icons.bluetooth,
-                        size: 100.0,
-                        color: base,
+                    child: InkWell(
+                      hoverColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: () {
+                        if (_bluetoothState.isEnabled) {
+                          goToSettings();
+                        } else {
+                          print('e');
+                        }
+                      },
+                      child: CircleAvatar(
+                        backgroundColor:
+                            _bluetoothState.isEnabled ? bgColor : bg,
+                        minRadius: 85,
+                        maxRadius: 85,
+                        child: Icon(
+                          Icons.bluetooth,
+                          size: 100.0,
+                          color: base,
+                        ),
                       ),
                     ),
                   ))),
               Expanded(
                   flex: 3,
                   child: Container(
-                    color: bgColor,
+                    color: base,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          height: width / 1.5,
-                          color: Colors.amber,
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(22.0),
+                            topRight: Radius.circular(22.0),
+                          ),
+                          child: Container(
+                            height: width / 1.5,
+                            color: bgColor,
+                            child: Container(
+                              margin: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Device Name",
+                                            style: GoogleFonts.inter(
+                                              color: textColor,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            _name,
+                                            style: GoogleFonts.inter(
+                                              color: base,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Device Address",
+                                            style: GoogleFonts.inter(
+                                              color: textColor,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            _address,
+                                            style: GoogleFonts.inter(
+                                              color: base,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        enablePair = !enablePair;
+                                      });
+                                    },
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Auto Pairing",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16.0,
+                                              color: base,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          FlutterSwitch(
+                                            activeToggleColor: bgColor,
+                                            toggleColor: bgColor,
+                                            activeColor: base,
+                                            inactiveColor: bg,
+                                            width: width * 0.12,
+                                            height: width * 0.07,
+                                            value: _autoAcceptPairingRequests,
+                                            onToggle: (bool value) {
+                                              try {
+                                                setState(() {
+                                                  _autoAcceptPairingRequests =
+                                                      value;
+                                                });
+                                                if (value) {
+                                                  FlutterBluetoothSerial
+                                                      .instance
+                                                      .setPairingRequestHandler(
+                                                          (BluetoothPairingRequest
+                                                              request) {
+                                                    print(
+                                                        "Trying to auto-pair with Pin 1234");
+                                                    if (request
+                                                            .pairingVariant ==
+                                                        PairingVariant.Pin) {
+                                                      return Future.value(
+                                                          "1234");
+                                                    }
+                                                    return Future.value(null);
+                                                  });
+                                                } else {
+                                                  FlutterBluetoothSerial
+                                                      .instance
+                                                      .setPairingRequestHandler(
+                                                          null);
+                                                }
+                                              } catch (e) {
+                                                print(e);
+                                              }
+                                            },
+                                          ),
+                                        ]),
+                                  ),
+                                  InkWell(
+                                    onTap: () async {
+                                      try {
+                                        final BluetoothDevice? selectedDevice =
+                                            await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return ScanPage();
+                                            },
+                                          ),
+                                        );
+
+                                        if (selectedDevice != null) {
+                                          print('Discovery -> selected ' +
+                                              selectedDevice.address);
+                                        } else {
+                                          print(
+                                              'Discovery -> no device selected');
+                                        }
+                                      } catch (e) {
+                                        print(e);
+                                      }
+                                    },
+                                    child: Container(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Scan Devices",
+                                            style: GoogleFonts.inter(
+                                              color: base,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_forward,
+                                            size: 24.0,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        primary: base,
+                                      ),
+                                      onPressed: () async {
+                                        try {
+                                          final BluetoothDevice?
+                                              selectedDevice =
+                                              await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) {
+                                                return SelectBondedDevicePage(
+                                                    checkAvailability: false);
+                                              },
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          print(e);
+                                        }
+                                      },
+                                      child: Container(
+                                        child: Text(
+                                          "Connect",
+                                          style: GoogleFonts.inter(
+                                            fontWeight: FontWeight.bold,
+                                            color: bgColor,
+                                            fontSize: 16.0,
+                                          ),
+                                        ),
+                                      ))
+                                ],
+                              ),
+                            ),
+                          ),
                         )
                       ],
                     ),

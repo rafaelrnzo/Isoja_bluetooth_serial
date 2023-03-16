@@ -16,7 +16,14 @@ AppBar DashboardAppbar() {
   );
 }
 
+
+
 TextStyle bold24Prim() {
   return GoogleFonts.chakraPetch(
       color: bgColor, fontSize: 36, fontWeight: FontWeight.bold);
+}
+
+TextStyle bold20White() {
+  return GoogleFonts.inter(
+      color: bgColor, fontSize: 20, fontWeight: FontWeight.bold);
 }

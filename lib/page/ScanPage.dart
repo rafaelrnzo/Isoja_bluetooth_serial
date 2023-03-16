@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:isoja_application/global/color.dart';
 import 'package:isoja_application/widget/bluetoothdevicelist.dart';
 import 'package:isoja_application/page/selectbonded.dart';
 
@@ -76,9 +77,12 @@ class _ScanPage extends State<ScanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
+        backgroundColor: base,
+        elevation: 0,
         title: isDiscovering
-            ? Text('Discovering devices')
-            : Text('Discovered devices'),
+            ? Text('Discovering devices',)
+            : Text('Discovered devices',),
         actions: <Widget>[
           isDiscovering
               ? FittedBox(

@@ -1,9 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:isoja_application/global/color.dart';
 import 'package:isoja_application/helper/BluetoothManager.dart';
 import 'package:isoja_application/page/ControlPage.dart';
+import 'package:isoja_application/widget/Appbar.dart';
 import 'package:isoja_application/widget/bluetoothdevicelist.dart';
 
 class SelectBondedDevicePage extends StatefulWidget {
@@ -141,27 +145,34 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
             ))
         .toList();
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Select device'),
-        actions: <Widget>[
-          _isDiscovering
-              ? FittedBox(
-                  child: Container(
-                    margin: new EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
+      appBar: ScanDevice(),
+      body: ListView(children: list),
+    );
+  }
+
+  AppBar ScanDevice() {
+    return AppBar(
+      toolbarHeight: 80,
+      backgroundColor: base,
+      elevation: 0,
+      title: Text('Connect Device', style: bold20White()),
+      actions: <Widget>[
+        _isDiscovering
+            ? FittedBox(
+                child: Container(
+                  margin: const EdgeInsets.all(16.0),
+                  child: const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.white,
                     ),
                   ),
-                )
-              : IconButton(
-                  icon: Icon(Icons.replay),
-                  onPressed: _restartDiscovery,
-                )
-        ],
-      ),
-      body: ListView(children: list),
+                ),
+              )
+            : IconButton(
+                icon: Icon(Icons.replay),
+                onPressed: _restartDiscovery,
+              )
+      ],
     );
   }
 }

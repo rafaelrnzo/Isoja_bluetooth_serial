@@ -3,7 +3,7 @@ import 'package:flutter/animation.dart';
 final Color base = Color.fromRGBO(42, 50, 75, 1);
 final Color bg = Color.fromRGBO(190, 196, 211, 1);
 final Color disable = Color.fromRGBO(225, 229, 238, 1);
-const Color textColor = Color.fromRGBO(42, 50, 75, 0.8);
+const Color textColor = Color.fromRGBO(42, 50, 75, 0.7);
 const Color bgColor = Color.fromRGBO(252, 252, 252, 1);
 const Color subText = Color.fromRGBO(0, 0, 0, 0.56);
 const Color disableBaseColor = Color.fromRGBO(216, 226, 220, 1);
