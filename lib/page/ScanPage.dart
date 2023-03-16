@@ -81,7 +81,7 @@ class _ScanPage extends State<ScanPage> {
         backgroundColor: base,
         elevation: 0,
         title: isDiscovering
-            ? Text('Discovering devicess',)
+            ? Text('Discovering devices',)
             : Text('Discovered devices',),
         actions: <Widget>[
           isDiscovering
