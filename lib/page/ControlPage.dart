@@ -93,7 +93,7 @@ class _ControlPageState extends State<ControlPage> {
         selectedMusic = true;
       });
     } else {
-      BluetoothManager.sendData('p\n');
+      BluetoothManager.sendData('h\n');
       setState(() {
         selectedMusic = false;
       });

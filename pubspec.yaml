@@ -47,6 +47,8 @@ dependencies:
   file_picker: ^5.2.5
   firebase_storage: ^11.0.14
   firebase_core: ^2.7.0
+  ripple_wave: ^0.0.2
+  simple_ripple_animation: ^0.0.3
 
 
 dev_dependencies:

@@ -1,9 +1,17 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables, avoid_unnecessary_containers
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_switch/flutter_switch.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:isoja_application/global/color.dart';
 import 'package:isoja_application/page/selectbonded.dart';
 import 'package:isoja_application/page/ScanPage.dart';
+import 'package:isoja_application/widget/Appbar.dart';
+import 'package:ripple_wave/ripple_wave.dart';
+import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 
 // import './helpers/LineChart.dart';
 
@@ -24,6 +32,7 @@ class _DashboardPage extends State<DashboardPage> {
   // BackgroundCollectingTask? _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
+  bool enableSwitch = false;
 
   @override
   void initState() {
@@ -40,7 +49,7 @@ class _DashboardPage extends State<DashboardPage> {
         if ((await FlutterBluetoothSerial.instance.isEnabled) ?? false) {
           return false;
         }
-        await Future.delayed(Duration(milliseconds: 0xDD));
+        await Future.delayed(const Duration(milliseconds: 0xDD));
         return true;
       }).then((_) {
         // Update the address field
@@ -85,130 +94,226 @@ class _DashboardPage extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Bluetooth Serial'),
-      ),
-      body: Container(
-        child: ListView(
-          children: <Widget>[
-            Divider(),
-            SwitchListTile(
-              title: const Text('Enable Bluetooth'),
-              value: _bluetoothState.isEnabled,
-              onChanged: (bool value) {
-                try {
-                  future() async {
-                    if (value)
-                      await FlutterBluetoothSerial.instance.requestEnable();
-                    else
-                      await FlutterBluetoothSerial.instance.requestDisable();
-                  }
-
-                  future().then((_) {
-                    setState(() {});
-                  });
-                } catch (e) {
-                  print(e);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Bluetooth status'),
-              subtitle: Text(_bluetoothState.toString()),
-              trailing: ElevatedButton(
-                child: const Text('Settings'),
-                onPressed: () {
-                  FlutterBluetoothSerial.instance.openSettings();
-                },
-              ),
-            ),
-            ListTile(
-              title: const Text('Local adapter address'),
-              subtitle: Text(_address),
-            ),
-            ListTile(
-              title: const Text('Local adapter name'),
-              subtitle: Text(_name),
-              onLongPress: null,
-            ),
-            Divider(),
-            ListTile(title: const Text('Devices discovery and connection')),
-            SwitchListTile(
-              title: const Text('Auto-try specific pin when pairing'),
-              subtitle: const Text('Pin 1234'),
-              value: _autoAcceptPairingRequests,
-              onChanged: (bool value) {
-                try {
-                  setState(() {
-                    _autoAcceptPairingRequests = value;
-                  });
-                  if (value) {
-                    FlutterBluetoothSerial.instance.setPairingRequestHandler(
-                        (BluetoothPairingRequest request) {
-                      print("Trying to auto-pair with Pin 1234");
-                      if (request.pairingVariant == PairingVariant.Pin) {
-                        return Future.value("1234");
-                      }
-                      return Future.value(null);
-                    });
-                  } else {
-                    FlutterBluetoothSerial.instance
-                        .setPairingRequestHandler(null);
-                  }
-                } catch (e) {
-                  print(e);
-                }
-              },
-            ),
-            ListTile(
-              title: ElevatedButton(
-                  child: const Text('Explore discovered devices'),
-                  onPressed: () async {
-                    try {
-                      final BluetoothDevice? selectedDevice =
-                          await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return ScanPage();
-                          },
-                        ),
-                      );
-
-                      if (selectedDevice != null) {
-                        print(
-                            'Discovery -> selected ' + selectedDevice.address);
-                      } else {
-                        print('Discovery -> no device selected');
-                      }
-                    } catch (e) {
-                      print(e);
-                    }
-                  }),
-            ),
-            ListTile(
-              title: ElevatedButton(
-                child: const Text('Connect to paired device to chat'),
-                onPressed: () async {
-                  try {
-                    final BluetoothDevice? selectedDevice =
-                        await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return SelectBondedDevicePage(
-                              checkAvailability: false);
-                        },
+        backgroundColor: base,
+        appBar: DashboardAppbar(),
+        body: Container(
+          child: Column(
+            children: [
+              Expanded(
+                  child: SizedBox(
+                width: width,
+                height: 20,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 18.0),
+                  padding: const EdgeInsets.symmetric(vertical: 22.0),
+                  width: width,
+                  height: width / 10,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        enableSwitch = !enableSwitch;
+                      });
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
-                    );
-                  } catch (e) {
-                    print(e);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                      color: bgColor,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Enable Bluetooth",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.0,
+                                  color: base,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              FlutterSwitch(
+                                activeToggleColor: bgColor,
+                                toggleColor: bgColor,
+                                activeColor: base,
+                                inactiveColor: bg,
+                                width: width * 0.12,
+                                height: width * 0.07,
+                                value: enableSwitch,
+                                onToggle: (value) {
+                                  setState(() {
+                                    enableSwitch = value;
+                                  });
+                                },
+                              ),
+                            ]),
+                      ),
+                    ),
+                  ),
+                ),
+              )),
+              Expanded(
+                  flex: 3,
+                  child: Container(
+                      child: RippleAnimation(
+                    color: enableSwitch ? bg : base,
+                    delay: const Duration(milliseconds: 300),
+                    repeat: true,
+                    minRadius: 85,
+                    ripplesCount: 4,
+                    duration: const Duration(seconds: 3),
+                    child: CircleAvatar(
+                      backgroundColor: enableSwitch ? bgColor : bg,
+                      minRadius: 85,
+                      maxRadius: 85,
+                      child: Icon(
+                        Icons.bluetooth,
+                        size: 100.0,
+                        color: base,
+                      ),
+                    ),
+                  ))),
+              Expanded(
+                  flex: 3,
+                  child: Container(
+                    color: bgColor,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: width / 1.5,
+                          color: Colors.amber,
+                        )
+                      ],
+                    ),
+                  ))
+            ],
+          ),
+        ));
   }
 }
+
+
+// Container(
+//         child: ListView(
+//           children: <Widget>[
+//             Divider(),
+//             SwitchListTile(
+//               title: const Text('Enable Bluetooth'),
+//               value: _bluetoothState.isEnabled,
+//               onChanged: (bool value) {
+//                 try {
+//                   future() async {
+//                     if (value)
+//                       await FlutterBluetoothSerial.instance.requestEnable();
+//                     else
+//                       await FlutterBluetoothSerial.instance.requestDisable();
+//                   }
+
+//                   future().then((_) {
+//                     setState(() {});
+//                   });
+//                 } catch (e) {
+//                   print(e);
+//                 }
+//               },
+//             ),
+//             ListTile(
+//               title: const Text('Bluetooth status'),
+//               subtitle: Text(_bluetoothState.toString()),
+//               trailing: ElevatedButton(
+//                 child: const Text('Settings'),
+//                 onPressed: () {
+//                   FlutterBluetoothSerial.instance.openSettings();
+//                 },
+//               ),
+//             ),
+//             ListTile(
+//               title: const Text('Local adapter address'),
+//               subtitle: Text(_address),
+//             ),
+//             ListTile(
+//               title: const Text('Local adapter name'),
+//               subtitle: Text(_name),
+//               onLongPress: null,
+//             ),
+//             Divider(),
+//             ListTile(title: const Text('Devices discovery and connection')),
+//             SwitchListTile(
+//               title: const Text('Auto-try specific pin when pairing'),
+//               subtitle: const Text('Pin 1234'),
+//               value: _autoAcceptPairingRequests,
+//               onChanged: (bool value) {
+//                 try {
+//                   setState(() {
+//                     _autoAcceptPairingRequests = value;
+//                   });
+//                   if (value) {
+//                     FlutterBluetoothSerial.instance.setPairingRequestHandler(
+//                         (BluetoothPairingRequest request) {
+//                       print("Trying to auto-pair with Pin 1234");
+//                       if (request.pairingVariant == PairingVariant.Pin) {
+//                         return Future.value("1234");
+//                       }
+//                       return Future.value(null);
+//                     });
+//                   } else {
+//                     FlutterBluetoothSerial.instance
+//                         .setPairingRequestHandler(null);
+//                   }
+//                 } catch (e) {
+//                   print(e);
+//                 }
+//               },
+//             ),
+//             ListTile(
+//               title: ElevatedButton(
+//                   child: const Text('Explore discovered devices'),
+//                   onPressed: () async {
+//                     try {
+//                       final BluetoothDevice? selectedDevice =
+//                           await Navigator.of(context).push(
+//                         MaterialPageRoute(
+//                           builder: (context) {
+//                             return ScanPage();
+//                           },
+//                         ),
+//                       );
+
+//                       if (selectedDevice != null) {
+//                         print(
+//                             'Discovery -> selected ' + selectedDevice.address);
+//                       } else {
+//                         print('Discovery -> no device selected');
+//                       }
+//                     } catch (e) {
+//                       print(e);
+//                     }
+//                   }),
+//             ),
+//             ListTile(
+//               title: ElevatedButton(
+//                 child: const Text('Connect to paired device to chat'),
+//                 onPressed: () async {
+//                   try {
+//                     final BluetoothDevice? selectedDevice =
+//                         await Navigator.of(context).push(
+//                       MaterialPageRoute(
+//                         builder: (context) {
+//                           return SelectBondedDevicePage(
+//                               checkAvailability: false);
+//                         },
+//                       ),
+//                     );
+//                   } catch (e) {
+//                     print(e);
+//                   }
+//                 },
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
